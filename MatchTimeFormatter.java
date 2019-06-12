@@ -6,23 +6,19 @@ public class MatchTimeFormatter {
 
     public static String convertMatchTimeFormat(String inputMatchTime) {
         String newFormat = "";
-        String pattern = "^\\[(PM|FT|HT|H1|H2)\\]\\040([0-9]{1}|[0-9]{2}):([0-5]\\d)\\.([0-9]{3})$";
+        String pattern = "^\\[(PM|FT|HT|H1|H2)\\]\\040([0-9]{1}|[0-9]{2}|[0-9]{3}):([0-5]\\d)\\.([0-9]{3})$";
 
         Pattern regex = Pattern.compile(pattern);
 
         Matcher matcher = regex.matcher(inputMatchTime);
 
         if (matcher.matches()) {
-            String shortForm = matcher.group(1).toString();
+            String periodShortForm = matcher.group(1).toString();
             int minutes = Integer.parseInt(matcher.group(2).toString());
             int seconds = Integer.parseInt(matcher.group(3).toString());
             int milliseconds = Integer.parseInt(matcher.group(4).toString());
             int addedTimeMinutes;
             int addedTimeSeconds;
-
-            System.out.println(milliseconds);
-            System.out.println(seconds);
-            System.out.println(minutes);
 
             if (milliseconds >= 500) {
                 seconds++;
@@ -33,25 +29,30 @@ public class MatchTimeFormatter {
                 seconds = 60 - seconds;
             }
 
-            if(((minutes >= 45) && ((seconds + milliseconds) > 0)) && (shortForm.equals("H1"))) {
+            if(((minutes >= 45) && ((seconds + milliseconds) > 0)) && (periodShortForm.equals("H1"))) {
                 addedTimeMinutes = (minutes - 45);
                 addedTimeSeconds = seconds;
                 minutes = 45;
                 seconds = 0;
                 int[] times = {minutes,seconds,addedTimeMinutes,addedTimeSeconds};
-                return formatMatchTime(times, shortForm);
+                return formatMatchTime(times, periodShortForm);
             }
 
-            System.out.println(milliseconds);
-            System.out.println(seconds);
-            System.out.println(minutes);
+            if(((minutes >= 90) && ((seconds + milliseconds) > 0)) && (periodShortForm.equals("H2"))) {
+                addedTimeMinutes = (minutes - 90);
+                addedTimeSeconds = seconds;
+                minutes = 90;
+                seconds = 0;
+                int[] times = {minutes,seconds,addedTimeMinutes,addedTimeSeconds};
+                return formatMatchTime(times, periodShortForm);
+            }
 
+            int[] times = {minutes,seconds};
+            return formatMatchTime(times, periodShortForm);
 
         } else {
             return "INVALID";
         }
-
-        return newFormat;
     }
 
     public static String formatMatchTime(int[] times, String period) {
@@ -62,13 +63,32 @@ public class MatchTimeFormatter {
             formattedTimeStrings.add(String.format("%02d",times[i]));
         }
 
-        formattedMatchTime.append(formattedTimeStrings.get(0) + ":" + formattedTimeStrings.get(1));
+        formattedMatchTime.append(formattedTimeStrings.get(0) + ":" + formattedTimeStrings.get(1)).toString();
 
-        if (period.equals("H1")) {
+        if (times.length > 2) {
             formattedMatchTime.append(" +" + formattedTimeStrings.get(2) + ":" + formattedTimeStrings.get(3));
         }
 
-        formattedMatchTime.append(" - " + period);
+        formattedMatchTime.append(" - ");
+
+        switch (period) {
+            case "PM":
+                formattedMatchTime.append("PRE_MATCH");
+                break;
+            case "H1":
+                formattedMatchTime.append("FIRST_HALF");
+                break;
+            case "HT":
+                formattedMatchTime.append("HALF_TIME");
+                break;
+            case "H2":
+                formattedMatchTime.append("SECOND_HALF");
+                break;
+            case "FT":
+                formattedMatchTime.append("FULL_TIME");
+                break;
+
+        }
 
         return formattedMatchTime.toString();
     }
@@ -90,6 +110,7 @@ public class MatchTimeFormatter {
         examples.add("[PM] -10:00.000");
         examples.add("FOO");
         examples.add("[H1] 45:59.501");
+        examples.add("[H2] 108:59.501");
 
         for (String example: examples) {
             System.out.println("---------------------");
