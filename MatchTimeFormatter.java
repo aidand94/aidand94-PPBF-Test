@@ -5,14 +5,16 @@ import java.util.regex.Pattern;
 public class MatchTimeFormatter {
 
     public static String convertMatchTimeFormat(String inputMatchTime) {
-        String newFormat = "";
+        // Regex to split input String in base components periodShortForm, minutes, seconds, milliseconds
         String pattern = "^\\[(PM|FT|HT|H1|H2)\\]\\040([0-9]{1}|[0-9]{2}|[0-9]{3}):([0-5]\\d)\\.([0-9]{3})$";
 
+        // Pattern and Matcher for running regex on input string
         Pattern regex = Pattern.compile(pattern);
-
         Matcher matcher = regex.matcher(inputMatchTime);
 
+        //Check if the Regex matches the entire input String
         if (matcher.matches()) {
+            // Parse groups returned from Regex and convert to int
             String periodShortForm = matcher.group(1).toString();
             int minutes = Integer.parseInt(matcher.group(2).toString());
             int seconds = Integer.parseInt(matcher.group(3).toString());
@@ -29,6 +31,7 @@ public class MatchTimeFormatter {
                 seconds = 60 - seconds;
             }
 
+            // Check if first half has added time and format correspondingly
             if(((minutes >= 45) && ((seconds + milliseconds) > 0)) && (periodShortForm.equals("H1"))) {
                 addedTimeMinutes = (minutes - 45);
                 addedTimeSeconds = seconds;
@@ -38,6 +41,7 @@ public class MatchTimeFormatter {
                 return formatMatchTime(times, periodShortForm);
             }
 
+            // Check if second half has added time and format correspondingly
             if(((minutes >= 90) && ((seconds + milliseconds) > 0)) && (periodShortForm.equals("H2"))) {
                 addedTimeMinutes = (minutes - 90);
                 addedTimeSeconds = seconds;
@@ -47,10 +51,12 @@ public class MatchTimeFormatter {
                 return formatMatchTime(times, periodShortForm);
             }
 
+            // Default format for all other match times
             int[] times = {minutes,seconds};
             return formatMatchTime(times, periodShortForm);
 
         } else {
+            // Input String was not a in a valid format
             return "INVALID";
         }
     }
@@ -59,12 +65,14 @@ public class MatchTimeFormatter {
         ArrayList<String> formattedTimeStrings = new ArrayList<String>();
         StringBuilder formattedMatchTime = new StringBuilder();
 
+        // Pad all the times
         for (int i=0; i<times.length; i++) {
             formattedTimeStrings.add(String.format("%02d",times[i]));
         }
 
         formattedMatchTime.append(formattedTimeStrings.get(0) + ":" + formattedTimeStrings.get(1)).toString();
 
+        // Check to see if the format requires added time
         if (times.length > 2) {
             formattedMatchTime.append(" +" + formattedTimeStrings.get(2) + ":" + formattedTimeStrings.get(3));
         }
