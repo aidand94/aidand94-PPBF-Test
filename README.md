@@ -63,5 +63,8 @@ This would give all the correct expected outputs.
 ### Workings
 I've also added some images with some quick dooles on a page that might give some more insight into my thought processes.
 
+You can also test the regex here: https://regexr.com/4fo1f
+Based on this Stack Overflow question https://stackoverflow.com/questions/25873636/regex-pattern-for-exactly-hhmmss-time-string
+
 ### Git repo
 If you'd like me to make this repo private just ask :)
